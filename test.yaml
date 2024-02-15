@@ -1,0 +1,76 @@
+---
+# Source: nginx-test/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: ngnix-student-a-service
+  namespace: student-a
+  labels:
+    helm.sh/chart: nginx-test-0.1.0
+    app.kubernetes.io/name: nginx-test
+    app.kubernetes.io/instance: test
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: nginx-test
+    app.kubernetes.io/instance: test
+---
+# Source: nginx-test/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ngnix-student-a
+  namespace: student-a
+  labels:
+    helm.sh/chart: nginx-test-0.1.0
+    app.kubernetes.io/name: nginx-test
+    app.kubernetes.io/instance: test
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nginx-test
+      app.kubernetes.io/instance: test
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: nginx-test-0.1.0
+        app.kubernetes.io/name: nginx-test
+        app.kubernetes.io/instance: test
+        app.kubernetes.io/version: "1.16.0"
+        app.kubernetes.io/managed-by: Helm
+    spec:
+      containers:
+        - name: nginx-test
+          securityContext:
+            {}
+          image: "nginx:alpine3.18"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            limits:
+              cpu: 0.5
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
